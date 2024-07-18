@@ -39,7 +39,7 @@ class PlaceholderHub:
         self.devices = None
 
     async def authenticate(self, api_key) -> bool:
-        devices = []
+        devices = [""]
         self.devices = devices
         """Test if we can authenticate with the host."""
         return len(devices) > 0
