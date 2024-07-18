@@ -1,3 +1,4 @@
 {
-    "name": "govee_v2"
+    "name": "govee_v2",
+    "homeassistant": "2023.12.4"
 }
