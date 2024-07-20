@@ -13,7 +13,7 @@ from homeassistant.components.sensor import (
     PLATFORM_SCHEMA
 )
 
-from custom_components.govee_v2.devices.H5179 import H5179
+from custom_components.govee_v2.devices.H5179 import H5179, H5179_Device
 
 log = logging.getLogger()
 
@@ -24,15 +24,15 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-def setup_platform(hass: HomeAssistant, config: ConfigType, add_entities: AddEntitiesCallback,
+async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback,
                    discovery_info: DiscoveryInfoType | None = None) -> None:
-    device = config[CONF_DEVICE_ID]
+    device_id = config[CONF_DEVICE_ID]
     sku = config[CONF_NAME]
     api_key = config[CONF_API_KEY]
 
+    device = await H5179(api_key=api_key, sku=sku, device=device_id).update()
 
-
-    add_entities([GoveeTemperature(device, sku, api_key), GoveeHumidity(device, sku, api_key)])
+    async_add_entities([GoveeTemperature(device_id, sku, api_key, device), GoveeHumidity(device_id, sku, api_key, device)])
 
 
 class GoveeTemperature(SensorEntity):
@@ -44,11 +44,12 @@ class GoveeTemperature(SensorEntity):
     _attr_unique_id = f"{CONF_DEVICE_ID}-temp"
     _attr_name = "Temperature"
 
-    def __init__(self, device: str, sku: str, api_key: str) -> None:
-        log.info(f"Setting up temperature: {device} - {sku} - {api_key}")
-        self.device_id = device
+    def __init__(self, device_id: str, sku: str, api_key: str, device: H5179_Device) -> None:
+        log.info(f"Setting up temperature: {device_id} - {sku} - {api_key}")
+        self.device_id = device_id
         self.sku = sku
         self.api_key = api_key
+        self._attr_native_value = device.temperature
 
     async def async_update(self) -> None:
         log.info(f"Updating temperature for device {self.device_id} - {self.sku}")
@@ -66,11 +67,12 @@ class GoveeHumidity(SensorEntity):
     _attr_unique_id = f"{CONF_DEVICE_ID}-humidity"
     _attr_name = "Humidity"
 
-    def __init__(self, device: str, sku: str, api_key: str) -> None:
-        log.info(f"Setting up humidity: {device} - {sku} - {api_key}")
-        self.device_id = device
+    def __init__(self, device_id: str, sku: str, api_key: str, device: H5179_Device) -> None:
+        log.info(f"Setting up humidity: {device_id} - {sku} - {api_key}")
+        self.device_id = device_id
         self.sku = sku
         self.api_key = api_key
+        self._attr_native_value = device.temperature
 
     async def async_update(self) -> None:
         log.info(f"Updating humidity for device {self.device_id} - {self.sku}")
