@@ -38,7 +38,6 @@ def setup_platform(hass: HomeAssistant, config: ConfigType, add_entities: AddEnt
 
 class GoveeTemperature(SensorEntity):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_last_reset = datetime.now()
     _attr_native_unit_of_measurement = UnitOfTemperature.FAHRENHEIT
     _attr_native_value = -999
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -52,14 +51,15 @@ class GoveeTemperature(SensorEntity):
         self.api_key = api_key
 
     def update(self):
+        log.info(f"Updating temperature for device {self.device_id} - {self.sku}")
         device = H5179(api_key=self.api_key, sku=self.sku, device=self.device_id).update()
+        log.info(f"Device: {device}")
         self._attr_native_value = device.temperature
-        _attr_last_reset = datetime.now()
+        #_attr_last_reset = datetime.now()
 
 
 class GoveeHumidity(SensorEntity):
     _attr_device_class = SensorDeviceClass.HUMIDITY
-    _attr_last_reset = datetime.now()
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_native_value = -1
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -73,6 +73,8 @@ class GoveeHumidity(SensorEntity):
         self.api_key = api_key
 
     def update(self):
+        log.info(f"Updating humidity for device {self.device_id} - {self.sku}")
         device = H5179(api_key=self.api_key, sku=self.sku, device=self.device_id).update()
+        log.info(f"Device: {device}")
         self._attr_native_value = device.humidity
-        _attr_last_reset = datetime.now()
+        #_attr_last_reset = datetime.now()
