@@ -6,6 +6,6 @@
   "documentation": "https://www.example.com",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
-  "requirements": ["requests"],
+  "requirements": ["httpx"],
   "version": "2.0.0"
 }
