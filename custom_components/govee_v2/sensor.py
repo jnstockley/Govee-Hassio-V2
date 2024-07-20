@@ -45,6 +45,7 @@ class GoveeTemperature(SensorEntity):
     _attr_name = "Temperature"
 
     def __init__(self, device: str, sku: str, api_key: str) -> None:
+        log.info(f"Setting up temperature: {device} - {sku} - {api_key}")
         self.device_id = device
         self.sku = sku
         self.api_key = api_key
@@ -54,7 +55,6 @@ class GoveeTemperature(SensorEntity):
         device = await H5179(api_key=self.api_key, sku=self.sku, device=self.device_id).update()
         log.info(f"Device: {device}")
         self._attr_native_value = device.temperature
-        #_attr_last_reset = datetime.now()
 
 
 class GoveeHumidity(SensorEntity):
@@ -67,6 +67,7 @@ class GoveeHumidity(SensorEntity):
     _attr_name = "Humidity"
 
     def __init__(self, device: str, sku: str, api_key: str) -> None:
+        log.info(f"Setting up humidity: {device} - {sku} - {api_key}")
         self.device_id = device
         self.sku = sku
         self.api_key = api_key
@@ -76,4 +77,3 @@ class GoveeHumidity(SensorEntity):
         device = await H5179(api_key=self.api_key, sku=self.sku, device=self.device_id).update()
         log.info(f"Device: {device}")
         self._attr_native_value = device.humidity
-        #_attr_last_reset = datetime.now()
