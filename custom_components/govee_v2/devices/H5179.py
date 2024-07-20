@@ -20,22 +20,22 @@ class H5179:
         self.sku = sku
         self.device = device
 
-    def get_temperature(self) -> float:
-        device_state = GoveeAPIUtil.get_device_state(self.api_key, self.sku, self.device)
+    async def get_temperature(self) -> float:
+        device_state = await GoveeAPIUtil.get_device_state(self.api_key, self.sku, self.device)
 
         for capability in device_state:
             if capability["instance"] == "sensorTemperature":
                 return float(capability["state"]["value"])
 
-    def get_humidity(self) -> int:
-        device_state = GoveeAPIUtil.get_device_state(self.api_key, self.sku, self.device)
+    async def get_humidity(self) -> int:
+        device_state = await GoveeAPIUtil.get_device_state(self.api_key, self.sku, self.device)
 
         for capability in device_state:
             if capability["instance"] == "sensorHumidity":
                 return int(capability["state"]["value"]['currentHumidity'])
 
-    def update(self):
-        device_state = GoveeAPIUtil.get_device_state(self.api_key, self.sku, self.device)
+    async def update(self):
+        device_state = await GoveeAPIUtil.get_device_state(self.api_key, self.sku, self.device)
 
         temperature = -999.0
         humidity = -1.0
