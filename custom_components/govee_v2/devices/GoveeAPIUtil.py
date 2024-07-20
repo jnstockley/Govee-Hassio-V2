@@ -15,6 +15,7 @@ async def get_device_state(api_key: str, sku: str, device: str):
     async with httpx.AsyncClient() as client:
 
         response = await client.post(f"{BASE_URL}/router/api/v1/device/state", headers=headers, json=body)
+        log.warning(f"Failed to get device state: {response.status_code} - {response.text}")
 
     if response.status_code == 200:
         if "payload" in response.json():
