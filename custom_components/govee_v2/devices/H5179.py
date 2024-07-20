@@ -1,7 +1,11 @@
 """Govee Cloud API Implementation for Wi-Fi Thermometer"""
+import logging
 from dataclasses import dataclass
 
 from custom_components.govee_v2.devices import GoveeAPIUtil
+
+
+log = logging.getLogger()
 
 
 @dataclass
@@ -32,6 +36,11 @@ class H5179:
 
     def update(self):
         device_state = GoveeAPIUtil.get_device_state(self.api_key, self.sku, self.device)
+
+        temperature = -999.0
+        humidity = -1.0
+
+        log.info(f"Device State: {device_state}")
 
         for capability in device_state:
             if capability["instance"] == "sensorTemperature":

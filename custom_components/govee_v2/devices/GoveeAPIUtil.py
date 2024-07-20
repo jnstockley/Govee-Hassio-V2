@@ -1,4 +1,9 @@
+import logging
+
 import requests
+
+log = logging.getLogger()
+
 
 BASE_URL = "https://openapi.api.govee.com"
 
@@ -14,6 +19,9 @@ def get_device_state(api_key: str, sku: str, device: str):
             payload = response.json()["payload"]
             if "capabilities" in payload:
                 return payload["capabilities"]
+
+    else:
+        log.error(f"Failed to get device state: {response.status_code} - {response.text}")
 
 
 def control_device(api_key: str, sku: str, device: str, capability: dict) -> bool:

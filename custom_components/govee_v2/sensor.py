@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 from homeassistant.const import CONF_DEVICE_ID, CONF_API_KEY, CONF_NAME, UnitOfTemperature, PERCENTAGE
 from homeassistant.core import HomeAssistant
@@ -50,7 +49,7 @@ class GoveeTemperature(SensorEntity):
         self.sku = sku
         self.api_key = api_key
 
-    def update(self):
+    async def async_update(self) -> None:
         log.info(f"Updating temperature for device {self.device_id} - {self.sku}")
         device = H5179(api_key=self.api_key, sku=self.sku, device=self.device_id).update()
         log.info(f"Device: {device}")
@@ -72,7 +71,7 @@ class GoveeHumidity(SensorEntity):
         self.sku = sku
         self.api_key = api_key
 
-    def update(self):
+    async def async_update(self) -> None:
         log.info(f"Updating humidity for device {self.device_id} - {self.sku}")
         device = H5179(api_key=self.api_key, sku=self.sku, device=self.device_id).update()
         log.info(f"Device: {device}")
