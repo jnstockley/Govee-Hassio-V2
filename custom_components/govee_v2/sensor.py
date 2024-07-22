@@ -1,7 +1,8 @@
 import logging
+from datetime import timedelta
 
 from homeassistant.const import CONF_DEVICE_ID, CONF_API_KEY, CONF_NAME, UnitOfTemperature, PERCENTAGE
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, DOMAIN
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType, ConfigType
 import homeassistant.helpers.config_validation as cv
@@ -12,6 +13,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
     PLATFORM_SCHEMA
 )
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from custom_components.govee_v2.devices.H5179 import H5179, H5179_Device
 
@@ -25,14 +27,37 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 
 async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback,
-                   discovery_info: DiscoveryInfoType | None = None) -> None:
+                               discovery_info: DiscoveryInfoType | None = None) -> None:
     device_id = config[CONF_DEVICE_ID]
     sku = config[CONF_NAME]
     api_key = config[CONF_API_KEY]
 
+    coordinator = MyCoordinator(hass)
+
+    await coordinator.async_config_entry_first_refresh()
+
     device = await H5179(api_key=api_key, sku=sku, device=device_id).update()
 
-    async_add_entities([GoveeTemperature(device_id, sku, api_key, device), GoveeHumidity(device_id, sku, api_key, device)])
+    async_add_entities(
+        [GoveeTemperature(device_id, sku, api_key, device), GoveeHumidity(device_id, sku, api_key, device)])
+
+
+class MyCoordinator(DataUpdateCoordinator):
+
+    def __init__(self, hass):
+        """Initialize my coordinator."""
+        super().__init__(
+            hass,
+            log,
+            # Name of the data. For logging purposes.
+            name="Govee W-Fi Thermometer",
+            # Polling interval. Will only be polled if there are subscribers.
+            update_interval=timedelta(minutes=5),
+            # Set always_update to `False` if the data returned from the
+            # api can be compared via `__eq__` to avoid duplicate updates
+            # being dispatched to listeners
+            always_update=True
+        )
 
 
 class GoveeTemperature(SensorEntity):
