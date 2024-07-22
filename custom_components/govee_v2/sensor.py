@@ -1,6 +1,7 @@
 import logging
 from datetime import timedelta
 
+import async_timeout
 from homeassistant.const import CONF_DEVICE_ID, CONF_API_KEY, CONF_NAME, UnitOfTemperature, PERCENTAGE
 from homeassistant.core import HomeAssistant, DOMAIN
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -32,19 +33,21 @@ async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_ad
     sku = config[CONF_NAME]
     api_key = config[CONF_API_KEY]
 
-    coordinator = MyCoordinator(hass)
+    device = H5179(api_key=api_key, sku=sku, device=device_id)
+
+    coordinator = MyCoordinator(hass, device)
 
     await coordinator.async_config_entry_first_refresh()
 
-    device = await H5179(api_key=api_key, sku=sku, device=device_id).update()
+    new_device = await device.update()
 
     async_add_entities(
-        [GoveeTemperature(device_id, sku, api_key, device), GoveeHumidity(device_id, sku, api_key, device)])
+        [GoveeTemperature(device_id, sku, api_key, new_device), GoveeHumidity(device_id, sku, api_key, new_device)])
 
 
 class MyCoordinator(DataUpdateCoordinator):
 
-    def __init__(self, hass):
+    def __init__(self, hass, device):
         """Initialize my coordinator."""
         super().__init__(
             hass,
@@ -58,6 +61,21 @@ class MyCoordinator(DataUpdateCoordinator):
             # being dispatched to listeners
             always_update=True
         )
+
+        self.device = device
+
+    async def _async_update_data(self):
+        try:
+            # Note: asyncio.TimeoutError and aiohttp.ClientError are already
+            # handled by the data update coordinator.
+            async with async_timeout.timeout(10):
+                # Grab active context variables to limit data required to be fetched from API
+                # Note: using context is not required if there is no need or ability to limit
+                # data retrieved from API.
+                return await self.device.update()
+        except Exception as e:
+            log.error(f"Failed to update device: {e}")
+            raise e
 
 
 class GoveeTemperature(SensorEntity):
